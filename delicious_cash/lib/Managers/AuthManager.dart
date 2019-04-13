@@ -1,26 +1,27 @@
-//import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthManager {
-  // GoogleSignIn _googleSignIn = new GoogleSignIn(
-  //     scopes: ['email', 'https://www.googleapis.com/auth/contacts.readonly']);
 
-  void initLogin() {
-    print("doLogin");
+  GoogleSignIn googleSignIn = new GoogleSignIn(scopes: [
+    'email',
+    'https://www.googleapis.com/auth/contacts.readonly',
+  ]);
 
-    // _googleSignIn.onCurrentUserChanged
-    //     .listen((GoogleSignInAccount account) async {
-    //   if (account != null) {
-    //   } else {}
-    // });
+  GoogleSignInAccount currentUser;
 
-    // _googleSignIn.signInSilently().whenComplete(() {});
+  String contactText;
+
+  Future<void> handleSignIn() async {
+    debugPrint('In Handle signin');
+
+    try {
+      await googleSignIn.signIn();
+    } catch (e) {
+      debugPrint(e);
+    }
   }
-
-  // void doLogin() {
-    
-  //   //await _googleSignIn.signIn();
-  // }
 
   // Future<GoogleSignInAccount> getGoogleSignin(GoogleSignIn gSignin) async {
   //   // Is the user already signed in?

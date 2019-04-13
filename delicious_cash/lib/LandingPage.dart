@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
+import 'dart:convert' show json;
+import "package:http/http.dart" as http;
+
 import './Managers/AuthManager.dart';
+
 //import './Models/StateModel.dart';
 //import './Dashboard.dart';
 
@@ -15,15 +20,6 @@ class LandingPage extends StatefulWidget {
 }
 
 class LandingPageState extends State<LandingPage> {
-  GoogleSignIn _googleSignIn = new GoogleSignIn(scopes: [
-    'email',
-    'https://www.googleapis.com/auth/contacts.readonly',
-  ]);
-
-  GoogleSignInAccount _currentUser;
-
-  String _contactText;
-
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   final AuthManager authManager = AuthManager();
@@ -36,59 +32,114 @@ class LandingPageState extends State<LandingPage> {
   void initState() {
     super.initState();
 
-    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+    authManager.googleSignIn.onCurrentUserChanged
+        .listen((GoogleSignInAccount account) {
       setState(() {
-        _currentUser = account;
+        authManager.currentUser = account;
       });
 
-      if (_currentUser != null) {
+      if (authManager.currentUser != null) {
         _handleGetContact();
       } else {
         debugPrint("User Not logged In");
       }
     });
-    _googleSignIn.signInSilently();
+    authManager.googleSignIn.signInSilently();
   }
 
-  void _handleGetContact() {
-    debugPrint('_handleGetContact');
-  }
+  Future<void> _handleGetContact() async {
+    setState(() {
+      authManager.contactText = "Loading contact info...";
+    });
 
-  Future<void> _handleSignIn() async {
-    debugPrint('In Handle signin');
+    http.Response response = await http.get(
+      'https://people.googleapis.com/v1/people/me/connections'
+          '?requestMask.includeField=person.names',
+      headers: await authManager.currentUser.authHeaders,
+    );
 
-    try {
-      await _googleSignIn.signIn();
-    } catch (e) {
-      debugPrint(e);
+    if (response.statusCode != 200) {
+      setState(() {
+        authManager.contactText = "People API gave ${response.statusCode}"
+            "response. Check logs for details";
+      });
+      return;
     }
+
+    Map<String, dynamic> data = json.decode(response.body);
+    var namedContact = _pickFirstNameContact(data);
+
+    setState(() {
+      if (namedContact != null) {
+        authManager.contactText = "I see you know $namedContact";
+      } else {
+        authManager.contactText = "No contacts to display";
+      }
+    });
+  }
+
+  String _pickFirstNameContact(Map<String, dynamic> data) {
+    List<dynamic> connections = data['connections'];
+    Map<String, dynamic> contact = connections.firstWhere(
+      (dynamic contact) => contact['names'] != null,
+      orElse: () => null,
+    );
+    if (contact != null) {
+      Map<String, dynamic> name = contact['names'].firstWhere(
+        (dynamic name) => name['displayName'] != null,
+        orElse: () => null,
+      );
+      if (name != null) {
+        return name['displayName'];
+      }
+    }
+    return null;
   }
 
   Widget handleState() {
-    if (_currentUser != null) {
-      debugPrint(_currentUser.displayName);
+    if (authManager.currentUser != null) {
       return loggedInWidget();
     } else {
-      return RaisedButton(
-        onPressed: () {
-          _handleSignIn();
-        },
-        child: Text('Google signin'),
-      );
+      return loggedOutWidget();
     }
   }
 
-  Widget loggedInWidget() {
-    var name = _currentUser.displayName;
-
+  Widget loggedOutWidget() {
     return Column(
       children: <Widget>[
-        Text('$name is currently logged In'),
+        Text('You are currently not Logged In!'),
+        RaisedButton(
+          onPressed: () {
+            authManager.handleSignIn();
+          },
+          child: Text('Google SIGN IN'),
+        )
+      ],
+    );
+  }
 
+  Widget loggedInWidget() {
+    return Column(
+      children: <Widget>[
+        ListTile(
+          leading: GoogleUserCircleAvatar(
+            identity: authManager.currentUser,
+          ),
+          title: Text(authManager.currentUser.displayName ?? ''),
+          subtitle: Text(authManager.currentUser.email ?? ''),
+        ),
+        const Text('Signed In Successfully'),
+        Text(authManager.contactText ?? ''),
         RaisedButton(
           child: Text('Logout'),
           onPressed: () {
-            _googleSignIn.signOut();
+            authManager.googleSignIn.signOut();
+          },
+        ),
+        RaisedButton(
+          child: Text('Refresh'),
+          onPressed: () {
+            _handleGetContact();
           },
         )
       ],
@@ -97,16 +148,11 @@ class LandingPageState extends State<LandingPage> {
 
   Widget androidScaffold() {
     return Scaffold(
-      body: Container(
-        child: ListView(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Center(
-              child: Column(
-                children: <Widget>[
-                  handleState(),
-                ],
-              ),
-            )
+            handleState(),
           ],
         ),
       ),
