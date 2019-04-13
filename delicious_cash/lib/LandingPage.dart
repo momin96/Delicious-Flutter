@@ -44,7 +44,11 @@ class LandingPageState extends State<LandingPage> {
         debugPrint("User Not logged In");
       }
     });
-    authManager.googleSignIn.signInSilently();
+    try {
+      authManager.googleSignIn.signInSilently();
+    } catch (e) {
+      debugPrint(e);
+    }
   }
 
   Future<void> _handleGetContact() async {
