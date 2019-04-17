@@ -6,6 +6,7 @@ import 'dart:convert' show json;
 import "package:http/http.dart" as http;
 
 import './Managers/AuthManager.dart';
+import './Home.dart';
 
 //import './Models/StateModel.dart';
 //import './Dashboard.dart';
@@ -24,8 +25,10 @@ class LandingPageState extends State<LandingPage> {
 
   final AuthManager authManager = AuthManager();
 
+  BuildContext context;
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     return androidScaffold();
   }
 
@@ -39,7 +42,14 @@ class LandingPageState extends State<LandingPage> {
       });
 
       if (authManager.currentUser != null) {
-        _handleGetContact();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Home(),
+          ),
+        );
+
+        // _handleGetContact();
       } else {
         debugPrint("User Not logged In");
       }
