@@ -42,14 +42,14 @@ class LandingPageState extends State<LandingPage> {
       });
 
       if (authManager.currentUser != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Home(),
-          ),
-        );
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => Home(),
+        //     ),
+        //   );
 
-        // _handleGetContact();
+        _handleGetContact();
       } else {
         debugPrint("User Not logged In");
       }
@@ -135,13 +135,6 @@ class LandingPageState extends State<LandingPage> {
   Widget loggedInWidget() {
     return Column(
       children: <Widget>[
-        ListTile(
-          leading: GoogleUserCircleAvatar(
-            identity: authManager.currentUser,
-          ),
-          title: Text(authManager.currentUser.displayName ?? ''),
-          subtitle: Text(authManager.currentUser.email ?? ''),
-        ),
         const Text('Signed In Successfully'),
         Text(authManager.contactText ?? ''),
         RaisedButton(
@@ -162,6 +155,10 @@ class LandingPageState extends State<LandingPage> {
 
   Widget androidScaffold() {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(''),
+        leading: menuDrawer(),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -171,5 +168,19 @@ class LandingPageState extends State<LandingPage> {
         ),
       ),
     );
+  }
+
+  Widget menuDrawer() {
+    if (authManager.currentUser != null) {
+      return Padding(
+        padding: EdgeInsets.only(left: 10),
+        child: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {},
+        ),
+      );
+    } else {
+      return Container();
+    }
   }
 }
