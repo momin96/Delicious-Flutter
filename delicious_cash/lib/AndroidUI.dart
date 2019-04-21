@@ -52,7 +52,7 @@ class AndroidUI {
       padding: EdgeInsets.only(top: 20),
       child: RaisedButton(
         child: Text('Save'),
-        onPressed: () {},
+        onPressed: () => onTap(),
       ),
     );
   }
@@ -62,7 +62,7 @@ class AndroidUI {
       padding: EdgeInsets.only(top: 20),
       child: RaisedButton(
         child: Text('Cancel'),
-        onPressed: () {},
+        onPressed: () => onTap(),
       ),
     );
   }

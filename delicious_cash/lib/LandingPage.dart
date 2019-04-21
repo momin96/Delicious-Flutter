@@ -6,7 +6,7 @@ import 'dart:convert' show json;
 import "package:http/http.dart" as http;
 import 'UserProfile.dart';
 import './Managers/AuthManager.dart';
-import './Home.dart';
+import './Models/User.dart';
 
 //import './Models/StateModel.dart';
 //import './Dashboard.dart';
@@ -26,9 +26,13 @@ class LandingPageState extends State<LandingPage> {
   final AuthManager authManager = AuthManager();
 
   BuildContext context;
+
+  User user;
   @override
   Widget build(BuildContext context) {
     this.context = context;
+    this.user = User.createTestUser();
+
     return androidScaffold();
   }
 
@@ -175,8 +179,7 @@ class LandingPageState extends State<LandingPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserProfile(),
-                ));
+                    builder: (context) => UserProfile(user: this.user)));
           },
         ),
       );
