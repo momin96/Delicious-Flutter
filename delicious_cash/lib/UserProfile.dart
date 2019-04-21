@@ -61,18 +61,25 @@ class UserProfileState extends State<UserProfile> {
   }
 
   Widget getAndroidBody() {
+    debugPrint('getAndroidBody');
     return Container(
-      child: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          ListView(children: <Widget>[
-            AndroidUI.fullNameWidget(nameContoller),
-            // AndroidUI.emailWidget(emailContoller),
-            // AndroidUI.phoneWidget(phoneController),
-          ]),
-        ],
-      )),
+      padding: EdgeInsets.only(left: 20, right: 20),
+      child: ListView(children: <Widget>[
+        AndroidUI.fullNameWidget(nameContoller),
+        AndroidUI.emailWidget(emailContoller),
+        AndroidUI.phoneWidget(phoneController),
+        Row(
+          children: <Widget>[
+            Expanded(child: AndroidUI.cancelButton(() {})),
+            Container(
+              width: 20,
+            ),
+            Expanded(
+              child: AndroidUI.saveButton(() {}),
+            ),
+          ],
+        ),
+      ]),
     );
   }
 }

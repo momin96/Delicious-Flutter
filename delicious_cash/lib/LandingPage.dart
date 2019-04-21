@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'dart:convert' show json;
 import "package:http/http.dart" as http;
-
+import 'UserProfile.dart';
 import './Managers/AuthManager.dart';
 import './Home.dart';
 
@@ -42,13 +42,6 @@ class LandingPageState extends State<LandingPage> {
       });
 
       if (authManager.currentUser != null) {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => Home(),
-        //     ),
-        //   );
-
         _handleGetContact();
       } else {
         debugPrint("User Not logged In");
@@ -176,7 +169,15 @@ class LandingPageState extends State<LandingPage> {
         padding: EdgeInsets.only(left: 10),
         child: IconButton(
           icon: Icon(Icons.menu),
-          onPressed: () {},
+          onPressed: () {
+            debugPrint('menu drawer');
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserProfile(),
+                ));
+          },
         ),
       );
     } else {
