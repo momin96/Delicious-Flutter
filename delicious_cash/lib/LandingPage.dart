@@ -39,55 +39,53 @@ class LandingPageState extends State<LandingPage> {
   void initState() {
     super.initState();
 
-    authManager.googleSignIn.onCurrentUserChanged
-        .listen((GoogleSignInAccount account) {
+    FirebaseAuth.instance.onAuthStateChanged.listen((user) {
+      //print(user);
       setState(() {
-        authManager.currentUser = account;
+        authManager.currentUser = user;
       });
 
       if (authManager.currentUser != null) {
-        _handleGetContact();
+        print(authManager.currentUser.email);
       } else {
-        debugPrint("User Not logged In");
+        print('User not logged in');
       }
     });
-    try {
-      authManager.googleSignIn.signInSilently();
-    } catch (e) {
+    try {} catch (e) {
       debugPrint(e);
     }
   }
 
-  Future<void> _handleGetContact() async {
-    setState(() {
-      authManager.contactText = "Loading contact info...";
-    });
+  // Future<void> _handleGetContact() async {
+  //   setState(() {
+  //     authManager.contactText = "Loading contact info...";
+  //   });
 
-    http.Response response = await http.get(
-      'https://people.googleapis.com/v1/people/me/connections'
-          '?requestMask.includeField=person.names',
-      headers: await authManager.currentUser.authHeaders,
-    );
+  //   http.Response response = await http.get(
+  //     'https://people.googleapis.com/v1/people/me/connections'
+  //         '?requestMask.includeField=person.names',
+  //     headers: await authManager.currentUser.authHeaders,
+  //   );
 
-    if (response.statusCode != 200) {
-      setState(() {
-        authManager.contactText = "People API gave ${response.statusCode}"
-            "response. Check logs for details";
-      });
-      return;
-    }
+  //   if (response.statusCode != 200) {
+  //     setState(() {
+  //       authManager.contactText = "People API gave ${response.statusCode}"
+  //           "response. Check logs for details";
+  //     });
+  //     return;
+  //   }
 
-    Map<String, dynamic> data = json.decode(response.body);
-    var namedContact = _pickFirstNameContact(data);
+  //   Map<String, dynamic> data = json.decode(response.body);
+  //   var namedContact = _pickFirstNameContact(data);
 
-    setState(() {
-      if (namedContact != null) {
-        authManager.contactText = "I see you know $namedContact";
-      } else {
-        authManager.contactText = "No contacts to display";
-      }
-    });
-  }
+  //   setState(() {
+  //     if (namedContact != null) {
+  //       authManager.contactText = "I see you know $namedContact";
+  //     } else {
+  //       authManager.contactText = "No contacts to display";
+  //     }
+  //   });
+  // // }
 
   String _pickFirstNameContact(Map<String, dynamic> data) {
     List<dynamic> connections = data['connections'];
@@ -108,6 +106,7 @@ class LandingPageState extends State<LandingPage> {
   }
 
   Widget handleState() {
+    print('handle state');
     if (authManager.currentUser != null) {
       return loggedInWidget();
     } else {
@@ -133,19 +132,19 @@ class LandingPageState extends State<LandingPage> {
     return Column(
       children: <Widget>[
         const Text('Signed In Successfully'),
-        Text(authManager.contactText ?? ''),
         RaisedButton(
           child: Text('Logout'),
           onPressed: () {
             authManager.googleSignIn.signOut();
+            authManager.firebaseAuth.signOut();
           },
         ),
-        RaisedButton(
-          child: Text('Refresh'),
-          onPressed: () {
-            _handleGetContact();
-          },
-        )
+        // RaisedButton(
+        //   child: Text('Refresh'),
+        //   onPressed: () {
+        //     //_handleGetContact();
+        //   },
+        // )
       ],
     );
   }

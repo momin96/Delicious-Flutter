@@ -1,23 +1,37 @@
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthManager {
-
   GoogleSignIn googleSignIn = new GoogleSignIn(scopes: [
     'email',
     'https://www.googleapis.com/auth/contacts.readonly',
   ]);
 
-  GoogleSignInAccount currentUser;
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
+  //GoogleSignInAccount currentUser;
+  GoogleSignInAuthentication googleAuth;
+  FirebaseUser currentUser;
   String contactText;
 
   Future<void> handleSignIn() async {
     debugPrint('In Handle signin');
 
     try {
-      await googleSignIn.signIn();
+      var gSigin = await googleSignIn.signIn();
+
+      googleAuth = await gSigin.authentication;
+
+      AuthCredential authCredential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      currentUser = await firebaseAuth.signInWithCredential(authCredential);
+      // debugPrint(currentUser.displayName);
+      // print(currentUser.isAnonymous);
+      // debugPrint(currentUser.email);
     } catch (e) {
       debugPrint(e);
     }
