@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import './AndroidUI.dart';
 import './Models/User.dart';
 import 'dart:io' show Platform;
+import './Managers/DatabaseManager.dart';
 
 class UserProfile extends StatefulWidget {
   User user;
@@ -19,9 +20,9 @@ class UserProfileState extends State<UserProfile> {
   User user;
   UserProfileState({this.user});
 
-  TextEditingController nameContoller;
-  TextEditingController emailContoller;
-  TextEditingController phoneController;
+  TextEditingController nameContoller = TextEditingController();
+  TextEditingController emailContoller = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -69,20 +70,19 @@ class UserProfileState extends State<UserProfile> {
   }
 
   Widget getAndroidBody() {
-    debugPrint(this.user.fullName);
-
+    debugPrint('getAndroidBody');
+    print(DatabaseManager.uid);
+    var db = new DatabaseManager();
+    db.getUserProfile();
     if (this.user.fullName != null) {
-      nameContoller = new TextEditingController();
       nameContoller.text = this.user.fullName;
     }
 
     if (this.user.email != null) {
-      emailContoller = new TextEditingController();
       emailContoller.text = this.user.email;
     }
 
     if (this.user.phoneNo != null) {
-      phoneController = new TextEditingController();
       phoneController.text = this.user.phoneNo;
     }
 
@@ -101,8 +101,6 @@ class UserProfileState extends State<UserProfile> {
               ),
               Expanded(
                 child: AndroidUI.saveButton(() {
-                  // debugPrint(emailContoller.text);
-                  // debugPrint(nameContoller.text);
                   setState(() {
                     debugPrint(phoneController.text);
                     this.user.phoneNo = phoneController.text;

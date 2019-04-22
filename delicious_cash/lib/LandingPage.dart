@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
-import 'dart:convert' show json;
-import "package:http/http.dart" as http;
+// import 'dart:async';
+// import 'dart:convert' show json;
+// import "package:http/http.dart" as http;
 import 'UserProfile.dart';
 import './Managers/AuthManager.dart';
 import './Models/User.dart';
+import './Managers/DatabaseManager.dart';
 
 //import './Models/StateModel.dart';
 //import './Dashboard.dart';
@@ -40,13 +41,12 @@ class LandingPageState extends State<LandingPage> {
     super.initState();
 
     FirebaseAuth.instance.onAuthStateChanged.listen((user) {
-      //print(user);
       setState(() {
         authManager.currentUser = user;
       });
 
       if (authManager.currentUser != null) {
-        print(authManager.currentUser.email);
+        DatabaseManager.uid = user.uid;
       } else {
         print('User not logged in');
       }
@@ -106,12 +106,30 @@ class LandingPageState extends State<LandingPage> {
   }
 
   Widget handleState() {
-    print('handle state');
     if (authManager.currentUser != null) {
       return loggedInWidget();
     } else {
       return loggedOutWidget();
     }
+  }
+
+// Function to demostrate stream build
+  Widget _handleCurrentScreen() {
+    return StreamBuilder<FirebaseUser>(
+      stream: FirebaseAuth.instance.onAuthStateChanged,
+      builder: (BuildContext context, user) {
+        if (user.connectionState == ConnectionState.waiting) {
+          // show loader
+          // show splash screen
+        } else {
+          if (user.hasData) {
+            // User is logged in take user to home page
+          } else {
+            // show Login screen
+          }
+        }
+      },
+    );
   }
 
   Widget loggedOutWidget() {
@@ -173,8 +191,6 @@ class LandingPageState extends State<LandingPage> {
         child: IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {
-            debugPrint('menu drawer');
-
             Navigator.push(
                 context,
                 MaterialPageRoute(
