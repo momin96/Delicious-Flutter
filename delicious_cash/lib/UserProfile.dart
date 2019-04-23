@@ -73,7 +73,9 @@ class UserProfileState extends State<UserProfile> {
     debugPrint('getAndroidBody');
     print(DatabaseManager.uid);
     var db = new DatabaseManager();
-    db.getUserProfile();
+    var user = db.getUserProfile();
+    print(user);
+
     if (this.user.fullName != null) {
       nameContoller.text = this.user.fullName;
     }

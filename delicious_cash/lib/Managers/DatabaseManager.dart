@@ -1,14 +1,17 @@
 import 'package:firebase_database/firebase_database.dart';
+import '../Models/User.dart';
+import 'dart:async' show Future;
 
 class DatabaseManager {
   FirebaseDatabase _database = FirebaseDatabase.instance;
 
   DatabaseManager._internal() {
+    FirebaseDatabase.instance.setPersistenceEnabled(true);
     _database = FirebaseDatabase.instance;
   }
 
   DatabaseManager() {
-    _database = FirebaseDatabase.instance;
+    DatabaseManager._internal();
   }
 
   static final DatabaseManager _singlton = new DatabaseManager._internal();
@@ -16,20 +19,23 @@ class DatabaseManager {
 
   static String uid;
 
-  void getUserProfile() {
+  Future<User> getUserProfile() async {
     var path = '/users/$uid/userProfile';
     print(path);
     var ref = _database.reference().child(path);
 
-    // ref.onValue.listen((event) {
-    //   var val = event.snapshot.value;
-    //   print('object');
-    //   print(val);
-    // });
+    var user;
 
-    ref.once().then((snapshot) {
-      print('  once ');
-      print(snapshot.value);
+    await ref.onValue.listen((event) async {
+      print('object');
+      user = await User.fromSnapshot(event.snapshot);
     });
+
+    return user;
+
+    // ref.once().then((snapshot) {
+    //   print('  once ');
+    //   print(snapshot.value);
+    // });
   }
 }
